@@ -1,13 +1,28 @@
 import express from "express";
+import session from "express-session";
+import cookieParser from "cookie-parser";
 
 const host = "0.0.0.0";
 const port = 3002;
 var listafornecedores = [];
 var listaProdutos = [];
-
 const app = express();
 
 app.use(express.urlencoded({extended: true}));
+
+app.use(session({
+        secret: "Ch4v3s3cr3t4",
+        resave: false,
+        saveUnintialized: false,
+        cookie: {
+            maxAge: 1000 * 60 * 15,
+            httpOnly: true,
+            secure: false
+        }
+}));
+
+app.use(cookieParser());
+
 
 app.get("/", (requisicao, resposta)=>{
     resposta.send(`
@@ -155,7 +170,7 @@ app.get("/", (requisicao, resposta)=>{
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="senha" class="label-custom">Senha</label>
-                                                    <input type="text"  id="senha" name="senha" class="form-control" placeholder="Senha">
+                                                    <input type="password"  id="senha" name="senha" class="form-control" placeholder="Senha">
                                                 </div>
                                                 <div class="row">
                                                     <div class="col-md-6 col-12">
@@ -182,11 +197,190 @@ app.get("/", (requisicao, resposta)=>{
 
 app.post("/Login", (requisicao, resposta)=>{
     const usuario = requisicao.body.usuario;
-    const senha = requisicao.body.senha;   
-    resposta.redirect("/menu");
+    const senha = requisicao.body.senha;
+    if(usuario == "admin" && senha == "123")
+    {
+        requisicao.session.logado = true;
+        const dataHorasAtuais = new Date();
+        resposta.cookie('ultimoLogin',dataHorasAtuais.toLocaleString(), { maxAge: 1000 * 60 * 60 * 24 * 30});
+        resposta.redirect("/menu");
+    }
+    else 
+    {
+      resposta.send(`
+                    <html lang="pt-br">
+                        <head>
+                            <meta charset="UTF-8">
+                            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">                            
+                            <title>Login do Sistema</title>
+
+                            <style>
+                                body {
+                                    background: linear-gradient(135deg, #4B0082, #FF69B4); /* Roxo e Rosa */
+                                    color: #fff;
+                                    font-family: Arial, sans-serif;
+                                }
+                                    .card{
+                                        border: none;
+                                        border-top: 5px solid  rgb(255, 255, 255);
+                                        background:rgb(48, 15, 58);
+                                        color:rgb(255, 255, 255);
+                                    }
+                                    p{
+                                        font-weight: 600;
+                                        font-size: 15px;
+                                    }
+
+                                    .division {
+                                        text-align: center;
+                                        margin: 5px 0;
+                                    }
+
+                                    .division .line {
+                                        width: 85%;
+                                        height: 2.5px;
+                                        background-color:rgb(255, 255, 255);
+                                        margin: 0 auto;
+                                    }
+
+                                    .text-below-line {
+                                        margin-top: 10px;
+                                        font-weight: 600;
+                                        font-size: 14px;
+                                        color: #aaa;
+                                    }
+                                    
+                                    .myform{
+                                        padding: 0 25px 0 33px;
+                                    }
+                                    .form-control {
+                                        border: 1px solid (135deg, #4B0082, #FF69B4);
+                                        border-radius: 3px;
+                                        background:rgb(98, 59, 105);
+                                        margin-bottom: 20px;
+                                        letter-spacing: 1px;
+                                        color: #fff;
+                                        transition: background-color 0.3s ease;
+                                    }
+
+                                    .form-control:focus {
+                                        background:rgb(98, 59, 105); 
+                                        color: #fff;
+                                        border-color: #4B0082;
+                                        box-shadow: none;
+                                    }
+                                    .bn{
+                                        text-decoration: underline;
+                                    }
+                                    .bn:hover{
+                                        cursor: pointer;
+                                    }
+                                    .form-check-input {
+                                        margin-top: 8px!important;
+                                        }
+                                    .btn-primary{
+                                    background: linear-gradient(135deg, #4B0082, #FF69B4);
+                                    border: none;
+                                    border-radius: 50px;
+                                    a
+                                    }
+                                    .btn-primary:focus{
+                                        box-shadow: none;
+                                        border: none;
+                                    }
+                                    small{
+                                        color:rgb(255, 255, 255); 
+                                    }
+                                    .far.fa-user{
+                                        font-size: 13px;
+                                    }
+
+                                    @media(min-width: 767px){
+                                        .bn{
+                                            text-align: right;
+                                        }
+                                    }
+                                    @media(max-width: 767px){
+                                        .form-check{
+                                            text-align: center;
+                                        }
+                                        .bn{
+                                            text-align: center;
+                                            align-items: center;
+                                        }
+                                    }
+                                    @media(max-width: 450px){
+                                        .fab{
+                                            width: 100%;
+                                            height: 100%;
+                                        }
+                                        .division .line{
+                                            width: 50%;
+                                        }
+                                    }
+
+                                    .login-title {
+                                        font-size: 28px;          
+                                        font-weight: 800;         
+                                        color:rgb(255, 255, 255);          
+                                        text-align: center;       
+                                        margin-bottom: 20px;      
+                                        letter-spacing: 1.2px;    
+                                        text-transform: uppercase; 
+                                    }
+
+                                    .label-custom {
+                                        color: rgb(255, 255, 255); 
+                                        font-weight: bold;
+                                    }
+                            </style>
+
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="row d-flex justify-content-center mt-5">
+                                    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                                        <div class="card py-3 px-2">
+                                            <p class="login-title">Login</p>
+                                            <div class="division">
+                                                <div class="line"></div>
+                                            </div>
+                                            <form class="login" id="login" action="/Login" method="post">
+                                                <div class="form-group">
+                                                    <label for="usuario" class="label-custom">Usuário</label>
+                                                    <input type="text"  id="usuario" name="usuario" class="form-control" placeholder="Usuário">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="senha" class="label-custom">Senha</label>
+                                                    <input type="password"  id="senha" name="senha" class="form-control" placeholder="Senha">
+                                                </div>
+                                                <span style="color: red;">Usuário ou Senha Inválidos</span>
+                                                <div class="row">
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="form-group form-check">
+                                                            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                                                            <label class="form-check-label" for="exampleCheck1">Permaneça Conectado</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12 bn">Esqueci a senha</div>
+                                                </div>
+                                                <div class="form-group mt-3 text-center"">
+                                                    <button type="submit" class="btn btn-block btn-primary btn-lg"><small><i class="far fa-user pr-2"></i>Entrar</small></button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>   
+                        </body> 
+                                            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+                    </html>       
+        `);
+    }
 });
 
-app.get("/menu", (requisicao, resposta) => {
+app.get("/menu", verificarAutenticacao, (requisicao, resposta) => {
+    const ultimoLogin = requisicao.cookies.ultimoLogin;
     resposta.send(`
 
         <html lang="pt-br">
@@ -272,6 +466,9 @@ app.get("/menu", (requisicao, resposta) => {
 
                                             <ul class="navbar-nav ms-auto">
                                                     <li class="nav-item">
+                                                        <span style="color: black;">${ultimoLogin?"Ultimo Acesso: "+ultimoLogin:""}</span>
+                                                    </li>
+                                                    <li class="nav-item">
                                                         <a class="nav-link" href="/Logout">Sair</a>
                                                     </li>
                                             </ul>
@@ -286,7 +483,7 @@ app.get("/menu", (requisicao, resposta) => {
 });
 
 
-app.get("/cadastrofornecedor", (requisicao, resposta) =>{
+app.get("/cadastrofornecedor", verificarAutenticacao, (requisicao, resposta) =>{
 
     resposta.send(` 
                 <html lang="pt-br">
@@ -409,7 +606,7 @@ app.get("/cadastrofornecedor", (requisicao, resposta) =>{
         resposta.end();
 });
 
-app.post("/cadastrofornecedor", (requisicao, resposta) => {
+app.post("/cadastrofornecedor", verificarAutenticacao, (requisicao, resposta) => {
 
     const razaosocial = requisicao.body.razaosocial
     const cnpj = requisicao.body.cnpj
@@ -663,7 +860,7 @@ app.post("/cadastrofornecedor", (requisicao, resposta) => {
     }
 });
 
-app.get("/listafornecedores", (requisicao, resposta) => {
+app.get("/listafornecedores", verificarAutenticacao, (requisicao, resposta) => {
     let conteudo=`
             <html lang="pt-br">
                     <head>
@@ -792,7 +989,7 @@ app.get("/listafornecedores", (requisicao, resposta) => {
     resposta.end();
 });
 
-app.get("/cadastroproduto", (requisicao, resposta) =>{
+app.get("/cadastroproduto", verificarAutenticacao, (requisicao, resposta) =>{
 
     resposta.send(` 
                 <html lang="pt-br">
@@ -895,7 +1092,7 @@ app.get("/cadastroproduto", (requisicao, resposta) =>{
         resposta.end();
 });
 
-app.post("/cadastroproduto", (requisicao, resposta) => {
+app.post("/cadastroproduto", verificarAutenticacao, (requisicao, resposta) => {
 
     const codigoBarras = requisicao.body.codigoBarras;
     const descricao = requisicao.body.descricao;
@@ -1110,7 +1307,7 @@ app.post("/cadastroproduto", (requisicao, resposta) => {
     }
 });
 
-app.get("/listaProdutos", (requisicao, resposta) => {
+app.get("/listaProdutos", verificarAutenticacao, (requisicao, resposta) => {
     let conteudo = `
         <html lang="pt-br">
             <head>
@@ -1230,8 +1427,20 @@ app.get("/listaProdutos", (requisicao, resposta) => {
     resposta.end();
 });
 
+function verificarAutenticacao(requisicao, resposta, next)
+{
+    if(requisicao.session.logado)
+    {
+        next();
+    }
+    else
+    {
+        resposta.redirect("/");
+    }
+}
 app.get("/Logout", (requisicao, resposta)=>{
-    resposta.send("<p>Você saiu do sistema, até breve!")
+    requisicao.session.destroy();
+    resposta.redirect("/");
 });
 
 app.listen(port, host, () => {
